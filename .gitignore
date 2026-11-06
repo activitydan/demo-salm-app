@@ -1,0 +1,8 @@
+node_modules
+dist
+*.log
+.env*
+# configurazione locale dell'anteprima
+.claude/
+# strumenti di esportazione verso Figma e schermate generate (locali, non servono alla demo)
+figma/
