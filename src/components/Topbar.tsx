@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bell, Check, ChevronDown, Layers, Menu, MapPin, Satellite, Search, Route as RouteIcon } from 'lucide-react';
+import { Bell, Check, ChevronDown, Layers, Menu, MapPin, Plus, Satellite, Search, Route as RouteIcon } from 'lucide-react';
 import { segnaLetti, seleziona, setCimitero, setFiltri, setUi, resetFiltri, useStore, volaA } from '../data/store';
 import { descrizioneScheda, testoRicerca, useAlert, useCimitero, useDatiCimitero, useSchedeCimitero, type AlertItem } from '../data/selectors';
 import type { StileMappa } from '../data/types';
@@ -119,7 +119,7 @@ function RicercaGlobale() {
 
   return (
     <div ref={ref} className="gsearch">
-      <div className="input-icon">
+      <div className="input-icon input-icon--dx">
         <Search size={17} />
         <input
           ref={input}
@@ -144,7 +144,6 @@ function RicercaGlobale() {
           }}
           aria-label="Cerca per nome, ID o area"
         />
-        <span className="kbd gsearch__kbd">/</span>
       </div>
       {aperto && q.trim().length >= 2 && (
         <div className="popover gsearch__pop">
@@ -181,7 +180,8 @@ function RicercaGlobale() {
   );
 }
 
-function CampanellaAlert() {
+/** Campanella degli alert. Nel menu laterale il pannello si apre verso l'alto, a destra del menu. */
+export function CampanellaAlert({ nelMenu }: { nelMenu?: boolean }) {
   const alert = useAlert();
   const letti = useStore((s) => s.db.alertLetti);
   const [aperto, setAperto] = useState(false);
@@ -194,13 +194,13 @@ function CampanellaAlert() {
     if (a.link) vai(a.link);
   };
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} className={nelMenu ? 'campanella campanella--menu' : 'campanella'} style={{ position: 'relative' }}>
       <button className="icon-btn" onClick={() => setAperto(!aperto)} aria-label={`Alert: ${nonLetti.length} da leggere`}>
         <Bell size={20} />
         {nonLetti.length > 0 && <span className="icon-btn__dot">{nonLetti.length}</span>}
       </button>
       {aperto && (
-        <div className="popover" style={{ right: 0, width: 380 }}>
+        <div className="popover" style={nelMenu ? { left: 0, bottom: 44, top: 'auto', width: 380 } : { right: 0, width: 380 }}>
           <div className="row row--between" style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
             <b>Alert</b>
             <button className="btn btn--ghost btn--xs" onClick={() => segnaLetti(alert.map((a) => a.id))} disabled={!nonLetti.length}>
@@ -236,10 +236,15 @@ const STILI: { id: StileMappa; label: string; icon: React.ReactNode }[] = [
   { id: 'planimetria', label: 'Planimetria', icon: <Layers size={14} /> },
 ];
 
+/** Satellite / Planimetria: nella barra sulla pagina Mappa, dentro la mappa nella Dashboard. */
+export function SceltaStileMappa() {
+  const stile = useStore((s) => s.ui.stileMappa);
+  return <Seg options={STILI.map((s) => ({ ...s, label: <span className="seg-label">{s.label}</span> }))} value={stile} onChange={(v) => setUi({ stileMappa: v })} />;
+}
+
 export function Topbar() {
   const rotta = useRotta();
-  const stile = useStore((s) => s.ui.stileMappa);
-  const suMappa = rotta.path === '/mappa' || rotta.path === '/';
+  const home = rotta.path === '/';
   return (
     <header className="topbar">
       <button className="icon-btn hamburger" onClick={() => setUi({ menuMobile: true })} aria-label="Apri il menu">
@@ -247,20 +252,18 @@ export function Topbar() {
       </button>
       <SelettoreCimitero />
       <RicercaGlobale />
-      {suMappa && (
+      {rotta.path === '/mappa' && (
         <div className="topbar__seg">
-          <Seg options={STILI.map((s) => ({ ...s, label: <span className="seg-label">{s.label}</span> }))} value={stile} onChange={(v) => setUi({ stileMappa: v })} />
+          <SceltaStileMappa />
         </div>
       )}
       <div className="grow" />
-      <CampanellaAlert />
-      <button className="user-chip" onClick={() => vai('/impostazioni')} title="Ufficio Cimiteri · Amministratore">
-        <span className="avatar avatar--sm" style={{ background: '#0A2F55' }}>UC</span>
-        <span className="user-chip__txt">
-          <b>Ufficio Cimiteri</b>
-          <span>Amministratore</span>
-        </span>
-      </button>
+      {home && (
+        <button className="btn btn--success topbar__new" onClick={() => vai('/rilievo')}>
+          <Plus size={16} />
+          <span>Nuovo rilievo</span>
+        </button>
+      )}
     </header>
   );
 }

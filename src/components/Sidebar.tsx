@@ -3,8 +3,9 @@ import {
 } from 'lucide-react';
 import { setUi, useStore } from '../data/store';
 import { useDatiCimitero } from '../data/selectors';
-import { href, useRotta } from '../router';
+import { href, useRotta, vai } from '../router';
 import { Logo } from './Logo';
+import { CampanellaAlert } from './Topbar';
 
 const VOCI = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -30,22 +31,32 @@ export function Sidebar() {
       <div className={`sidebar-backdrop ${aperta ? 'is-open' : ''}`} onClick={chiudi} />
       <aside className={`sidebar ${aperta ? 'is-open' : ''}`} aria-label="Menu principale">
         <a className="sidebar__brand" href={href('/')} onClick={chiudi}>
-          <Logo dark size={40} />
+          <Logo dark size={36} corto />
         </a>
         <nav className="sidebar__nav">
           {VOCI.map((v) => (
             <a key={v.path} href={href(v.path)} className={`nav-item ${attivo(v.path) ? 'is-active' : ''}`} onClick={chiudi} title={v.label}>
-              <v.icon size={20} />
+              <v.icon size={21} />
               <span>{v.label}</span>
-              {v.path === '/manutenzioni' && aperte > 0 && <b className="nav-item__badge nav-item__badge--danger">{aperte}</b>}
+              {v.path === '/manutenzioni' && aperte > 0 && <b className="nav-item__dot" aria-label={`${aperte} manutenzioni aperte`} />}
             </a>
           ))}
           <div className="nav-sep">Configurazione</div>
           <a href={href('/impostazioni')} className={`nav-item ${attivo('/impostazioni') ? 'is-active' : ''}`} onClick={chiudi} title="Impostazioni">
-            <Settings size={20} />
+            <Settings size={21} />
             <span>Impostazioni</span>
           </a>
         </nav>
+        <div className="sidebar__foot">
+          <button className="user-chip" onClick={() => { chiudi(); vai('/impostazioni'); }} title="Ufficio Cimiteri · Amministratore">
+            <span className="avatar avatar--sm" style={{ background: '#0A2F55' }}>UC</span>
+            <span className="user-chip__txt">
+              <b>Ufficio Cimiteri</b>
+              <span>Amministratore</span>
+            </span>
+          </button>
+          <CampanellaAlert nelMenu />
+        </div>
       </aside>
     </>
   );

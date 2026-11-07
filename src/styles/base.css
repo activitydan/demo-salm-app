@@ -38,7 +38,7 @@
   --shadow-3: 0 28px 70px rgba(10, 30, 60, 0.24);
   --font: 'Nunito Sans Variable', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Montserrat', 'Nunito Sans Variable', system-ui, sans-serif;
-  --sidebar-w: 244px;
+  --sidebar-w: 190px;
   --topbar-h: 64px;
   --focus: 0 0 0 3px rgba(27, 90, 143, 0.28);
 }

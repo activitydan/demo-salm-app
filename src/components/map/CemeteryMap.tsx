@@ -65,6 +65,8 @@ export function CemeteryMap(props: CemeteryMapProps) {
   const cbClick = useRef(onMapClick);
   cbSelect.current = onSelect;
   cbClick.current = onMapClick;
+  const perimetro = useRef(cimitero.perimetro);
+  perimetro.current = cimitero.perimetro;
 
   // creazione mappa
   useLayoutEffect(() => {
@@ -89,7 +91,11 @@ export function CemeteryMap(props: CemeteryMapProps) {
     aggiornaZoom();
     setMappa(m);
     onReady?.(m);
-    const ro = new ResizeObserver(() => m.invalidateSize({ pan: false }));
+    // nella Dashboard la mappa è un'anteprima: se cambia la finestra, il cimitero resta inquadrato per intero
+    const ro = new ResizeObserver(() => {
+      m.invalidateSize({ pan: false });
+      if (compatta) m.fitBounds(L.latLngBounds(perimetro.current), { padding: [20, 20], animate: false });
+    });
     ro.observe(box.current!);
     return () => {
       ro.disconnect();

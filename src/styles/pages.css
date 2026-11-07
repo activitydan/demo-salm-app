@@ -9,21 +9,22 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 12px 0 14px;
+  height: 39px;
+  padding: 0 14px 0 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: #fff;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 15px;
   color: var(--text);
   white-space: nowrap;
 }
 .cim-select:hover { border-color: var(--border-strong); }
-.gsearch { position: relative; flex: 1 1 300px; max-width: 440px; min-width: 190px; }
+.gsearch { position: relative; flex: 0 1 354px; min-width: 190px; }
 .gsearch .input { background: var(--surface-2); border-color: var(--border); height: 40px; padding-right: 34px; }
 .gsearch .input:focus { background: #fff; }
-.gsearch__kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
+.input-icon--dx > svg { left: auto; right: 16px; }
+.input-icon--dx > .input { padding-left: 14px; padding-right: 40px; }
 .gsearch__pop { left: 0; right: 0; max-height: 440px; overflow: auto; }
 .user-chip { display: inline-flex; align-items: center; gap: 9px; border: none; background: transparent; padding: 4px 6px; border-radius: 10px; }
 .user-chip:hover { background: var(--surface-3); }
@@ -36,7 +37,6 @@
 .alert-dot--info { background: var(--blu); box-shadow: 0 0 0 4px var(--blu-50); }
 
 @media (max-width: 1380px) {
-  .user-chip__txt { display: none; }
   .seg-label { display: none; }
 }
 @media (max-width: 1080px) {
@@ -46,10 +46,9 @@
 }
 @media (max-width: 760px) {
   .gsearch { flex: 1; width: auto; min-width: 0; }
-  .gsearch__kbd { display: none; }
   .cim-select__name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
   .cim-select { padding: 0 8px; font-size: 13px; }
-  .topbar__seg, .user-chip { display: none; }
+  .topbar__seg { display: none; }
 }
 
 /* ---------- pannello laterale scheda ---------- */
@@ -171,9 +170,9 @@
 .bento__censite, .bento__manut, .bento__attivita { grid-column: span 4; }
 .bento__map-top { position: absolute; z-index: 500; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
 .bento__map-top > * { pointer-events: auto; }
-.bento__map-legend { position: absolute; z-index: 500; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 4px 6px; }
-.bento__map-legend .legend__item { background: rgba(255, 255, 255, 0.95); border: none; border-radius: 8px; padding: 5px 9px; font-size: 12px; font-weight: 700; box-shadow: var(--shadow-1); }
-.bento__map-legend .legend__item b { margin-left: 4px; color: var(--muted); }
+.bento__map-legend { position: absolute; z-index: 500; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.bento__map-legend .legend__item { background: rgba(255, 255, 255, 0.95); border: none; border-radius: 8px; padding: 5px 8.4px 5px 9px; font-size: 12px; font-weight: 700; box-shadow: var(--shadow-1); }
+.bento__map-legend .legend__item b { margin-left: -1.25px; color: var(--muted); }
 .widget { display: flex; flex-direction: column; }
 .widget__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
 .widget__head h3 { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
@@ -269,3 +268,66 @@
 
 .chip__n { font-size: 11px; font-weight: 800; color: var(--muted); background: var(--surface-3); border-radius: 8px; padding: 0 6px; margin-left: 2px; }
 .chip.is-on .chip__n { background: #fff; color: var(--navy); }
+
+/* ---------- home: frame Figma 104:36, tutta in una schermata a 1440 x 807 ---------- */
+.topbar__new { height: 40px; padding: 0 20px 0 15px; font-size: 13.5px; }
+@media (max-width: 1080px) { .topbar__new { width: 40px; padding: 0; justify-content: center; } }
+/* Su computer la home sta tutta in una schermata: la mappa prende l'altezza che resta, i riquadri sotto restano alti 196 px.
+   A 1440 x 807 coincide col frame; il margine destro (73 px nel frame) scende a 38 px sugli schermi larghi,
+   allineato al pulsante "Nuovo rilievo". */
+.page--home {
+  height: 100%;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px clamp(38px, calc(1513px - 100vw), 73px) 11px 37px;
+  max-width: none;
+  margin: 0;
+}
+.page--home .bento { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr) 196px; }
+.page--home .bento > * { min-height: 0; }
+.page--home .bento__map { height: auto; container-type: inline-size; }
+.page--home .bento__alert { height: auto; }
+.page--home .bento__censite, .page--home .bento__manut, .page--home .bento__attivita { grid-column: span 4; height: auto; container-type: inline-size; }
+.page--home .bento__censite .widget__body, .page--home .bento__manut .widget__body { overflow: hidden; }
+.page--home .bento__attivita .widget__body { overflow: auto; margin-bottom: 24px; padding-bottom: 0; }
+/* barre di scorrimento invisibili finché non ci si passa sopra, come nel frame (lo spazio resta, niente salti) */
+.page--home .bento__alert .widget__body, .page--home .bento__attivita .widget__body { scrollbar-color: transparent transparent; }
+.page--home .bento__alert .widget__body:hover, .page--home .bento__attivita .widget__body:hover { scrollbar-color: #c3ccd7 transparent; }
+.bento__map-seg .seg { padding: 3px 4px; background: rgba(255, 255, 255, 0.96); border: none; box-shadow: var(--shadow-1); }
+.bento__map-seg .seg button { height: 26px; }
+/* Satellite / Planimetria: le scritte restano finché la mappa è abbastanza larga */
+.bento__map-seg .seg-label { display: inline; }
+@container (max-width: 520px) { .bento__map-seg .seg-label { display: none; } }
+/* riquadri stretti (schermi da 1100 a 1400 px): ciambella e numeri più piccoli */
+@container (max-width: 345px) {
+  .bento__censite .row > div:first-child { width: 92px !important; height: 92px !important; }
+  .bento__censite .row > div:first-child svg { width: 100%; height: 100%; }
+  .bento__censite .row > div:first-child .display { font-size: 18px !important; }
+  .bento__censite .kpi__value { font-size: 24px; }
+  .bento__censite .kpi__value small { white-space: nowrap; }
+  .mini-kpis span { font-size: 10px; }
+}
+@container (max-width: 300px) {
+  .bento__censite .kpi__value small { display: block; margin: 2px 0 0; }
+}
+/* attività: una riga per nome e una per chi/quando, così le voci hanno sempre la stessa altezza */
+.bento__attivita .list-item .tiny { display: block; line-height: 20.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1100px) {
+  .page--home { height: auto; min-height: 0; display: block; padding: 20px 20px 24px; }
+  .page--home .bento { grid-template-rows: none; }
+  .page--home .bento__map { height: 420px; }
+  .page--home .bento__alert { max-height: 380px; }
+  .page--home .bento__censite, .page--home .bento__manut { grid-column: span 6; height: 196px; }
+  .page--home .bento__attivita { grid-column: span 12; height: auto; }
+  .page--home .bento__attivita .widget__body { margin-bottom: 0; padding-bottom: 8px; }
+}
+@media (max-width: 760px) {
+  .page--home { padding: 16px 14px 40px; }
+  .page--home .bento__map { height: 360px; }
+  .page--home .bento__censite, .page--home .bento__manut { height: auto; }
+}
+/* su computer il menu è sempre aperto: il pulsante per aprirlo serve solo sul telefono */
+.topbar .hamburger { display: none; }
+@media (max-width: 760px) { .topbar .hamburger { display: inline-flex; } }
+

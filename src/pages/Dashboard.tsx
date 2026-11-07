@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { ArrowRight, Bell, ClipboardList, Maximize2, Plus, Wrench } from 'lucide-react';
+import { ArrowRight, Bell, ClipboardList, Maximize2, Wrench } from 'lucide-react';
 import { CemeteryMap } from '../components/map/CemeteryMap';
+import { SceltaStileMappa } from '../components/Topbar';
 import { Avatar, Ciambella, Dot, StatoBadge } from '../components/ui';
 import { resetFiltri, segnaLetti, seleziona, setFiltri, useStore } from '../data/store';
 import { conta, descrizioneScheda, useAlert, useCimitero, useDatiCimitero, useSchedeCimitero } from '../data/selectors';
-import { aggiungiGiorni, dataBreve, dataLunga, dataOra, numero, oggiISO, percentuale, saluto } from '../lib/format';
+import { aggiungiGiorni, dataBreve, dataOra, numero, oggiISO, percentuale } from '../lib/format';
 import { href, vai } from '../router';
 
 function Widget({ titolo, icona, link, linkLabel = 'Apri', children, className, colore = '#1B5A8F' }: {
@@ -37,7 +38,6 @@ export function Dashboard() {
   const recenti = useMemo(() => [...schede].sort((a, b) => b.rilevatoIl.localeCompare(a.rilevatoIl)).slice(0, 5), [schede]);
   const settimana = useMemo(() => schede.filter((s) => s.rilevatoIl.slice(0, 10) >= aggiungiGiorni(oggi, -7)).length, [schede, oggi]);
   const urgenti = manutenzioni.filter((m) => m.stato !== 'risolta' && m.priorita === 'urgente').length;
-  const prossimi = manutenzioni.filter((m) => m.dataPianificata && m.stato !== 'risolta' && m.dataPianificata >= oggi).sort((a, b) => a.dataPianificata!.localeCompare(b.dataPianificata!)).slice(0, 3);
   const letti = db.alertLetti;
 
   if (!cimitero) return null;
@@ -48,17 +48,9 @@ export function Dashboard() {
   };
 
   return (
-    <div className="page">
-      <div className="page-head">
-        <div className="page-head__title">
-          <h1>{saluto()}</h1>
-          <p>{dataLunga(oggi)} · {cimitero.nome}</p>
-        </div>
-        <div className="page-head__actions">
-          <button className="btn btn--success" onClick={() => vai('/rilievo')}><Plus size={16} />Nuovo rilievo</button>
-        </div>
-      </div>
-
+    <div className="page page--home">
+      {/* senza intestazione: "Nuovo rilievo" sta nella barra in alto, come nel frame Figma */}
+      <h1 className="sr-only">Dashboard · {cimitero.nome}</h1>
       <div className="bento">
         <section className="card bento__map">
           <CemeteryMap
@@ -77,7 +69,7 @@ export function Dashboard() {
             }}
           />
           <div className="bento__map-top">
-            <span />
+            <div className="bento__map-seg"><SceltaStileMappa /></div>
             <a className="btn btn--sm" href={href('/mappa')}><Maximize2 size={14} />Apri la mappa</a>
           </div>
           <div className="bento__map-legend">
@@ -131,14 +123,6 @@ export function Dashboard() {
             <a href={href('/manutenzioni?stato=in_corso')}><b>{manutenzioni.filter((m) => m.stato === 'in_corso').length}</b><span>in corso</span></a>
             <a href={href('/manutenzioni')} className="is-danger"><b>{urgenti}</b><span>urgenti</span></a>
           </div>
-          <div className="upper muted mt-12">Prossimi interventi</div>
-          {prossimi.map((m) => (
-            <a key={m.id} className="mini-row mt-8" href={href(`/manutenzioni?id=${m.id}`)}>
-              <span className="cal-chip"><b>{m.dataPianificata!.slice(8, 10)}</b>{new Date(m.dataPianificata!).toLocaleDateString('it-IT', { month: 'short' })}</span>
-              <span className="grow small"><b>{config.categorieManutenzione.find((c) => c.id === m.categoria)?.label}</b><br /><span className="muted">{m.schedaId}</span></span>
-            </a>
-          ))}
-          {!prossimi.length && <p className="small muted mt-8">Nessun intervento in calendario.</p>}
         </Widget>
 
         <Widget titolo="Attività recente" icona={<ClipboardList size={16} />} colore="#79AA4F" className="bento__attivita">
