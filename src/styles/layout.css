@@ -72,8 +72,9 @@
   place-items: center;
 }
 .nav-item__badge--danger { background: var(--danger); }
-/* manutenzioni aperte: solo un pallino, il numero è nella pagina */
-.nav-item__dot { margin-left: auto; margin-right: -9px; width: 11px; height: 11px; border-radius: 50%; background: var(--danger); flex: none; }
+/* icona della voce; su Manutenzioni porta il numero delle aperte, come la campanella degli alert */
+.nav-item__ico { position: relative; display: grid; place-items: center; flex: none; font-style: normal; }
+.nav-item__ico .icon-btn__dot { top: -4px; right: -5px; letter-spacing: 0; }
 .nav-sep {
   margin: 14px 14px 6px;
   font-size: 10.5px;
@@ -216,7 +217,6 @@
 .sidebar .nav-item > span { letter-spacing: 0.47px; }
 @media (min-width: 1181px) {
   .sidebar .nav-item { padding: 2px 14px 0 15px; gap: 12.5px; }
-  .sidebar .nav-item__dot { margin-left: -8px; margin-right: 0; }
 }
 /* marchio nel menu: Montserrat Bold 20 px, "APP" verde pieno, sottotitolo senza spaziatura */
 .sidebar__brand .wordmark__name { position: relative; top: -0.8px; font-size: 20px; font-weight: 700; letter-spacing: 0; }

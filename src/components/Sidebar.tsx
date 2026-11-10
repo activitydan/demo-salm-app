@@ -34,13 +34,26 @@ export function Sidebar() {
           <Logo dark size={36} corto />
         </a>
         <nav className="sidebar__nav">
-          {VOCI.map((v) => (
-            <a key={v.path} href={href(v.path)} className={`nav-item ${attivo(v.path) ? 'is-active' : ''}`} onClick={chiudi} title={v.label}>
-              <v.icon size={21} />
-              <span>{v.label}</span>
-              {v.path === '/manutenzioni' && aperte > 0 && <b className="nav-item__dot" aria-label={`${aperte} manutenzioni aperte`} />}
-            </a>
-          ))}
+          {VOCI.map((v) => {
+            const conteggio = v.path === '/manutenzioni' ? aperte : 0;
+            return (
+              <a
+                key={v.path}
+                href={href(v.path)}
+                className={`nav-item ${attivo(v.path) ? 'is-active' : ''}`}
+                onClick={chiudi}
+                title={conteggio ? `${v.label}: ${conteggio} aperte` : v.label}
+                aria-label={conteggio ? `${v.label}, ${conteggio} aperte` : undefined}
+              >
+                {/* numero sull'icona, come sulla campanella degli alert */}
+                <i className="nav-item__ico">
+                  <v.icon size={21} />
+                  {conteggio > 0 && <b className="icon-btn__dot" aria-hidden="true">{conteggio}</b>}
+                </i>
+                <span>{v.label}</span>
+              </a>
+            );
+          })}
           <div className="nav-sep">Configurazione</div>
           <a href={href('/impostazioni')} className={`nav-item ${attivo('/impostazioni') ? 'is-active' : ''}`} onClick={chiudi} title="Impostazioni">
             <Settings size={21} />
