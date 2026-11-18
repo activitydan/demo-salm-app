@@ -8,3 +8,5 @@ dist
 figma/
 # grafo di graphify (generato in locale, si rigenera)
 graphify-out/
+# appunti interni del progetto (mappa, ticket, bozze): restano solo sul computer
+.scratch/
