@@ -272,3 +272,36 @@
 .splash .spinner { width: 30px; height: 30px; border-width: 3px; margin-top: 40px; }
 .splash .callout { margin-top: 28px; max-width: min(520px, calc(100vw - 32px)); }
 .entra__logo .wordmark__sub { padding-left: 0.19em; }
+
+
+/* ---------- Dashboard sul telefono: la stessa del computer, in colonna ---------- */
+.azione--verde { background: var(--verde-600); border-color: var(--verde-600); color: #fff; }
+.azione--verde svg { color: #fff; }
+.azione--verde:hover { background: #3f7324; border-color: #3f7324; color: #fff; }
+@media (max-width: 760px) {
+  .page--home { padding: 12px 12px 32px; height: auto; min-height: 0; }
+  .page--home .bento { display: flex; flex-direction: column; gap: 12px; }
+  .page--home .bento > * { min-width: 0; }
+  /* mappa piccola e rettangolare; la legenda scende sotto, in una riga che scorre */
+  .page--home .bento__map { height: auto; display: flex; flex-direction: column; }
+  .page--home .bento__map .cmap { position: relative; inset: auto; flex: none; height: clamp(180px, 52vw, 260px); min-height: 0; }
+  .page--home .bento__map-top { top: 8px; left: 8px; right: 8px; }
+  .page--home .bento__map-legend { position: static; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 8px 10px; scrollbar-width: none; border-top: 1px solid var(--border); background: #fff; }
+  .page--home .bento__map-legend::-webkit-scrollbar { display: none; }
+  .page--home .bento__map-legend .legend__item { flex: none; box-shadow: none; border: 1px solid var(--border); white-space: nowrap; }
+  .bento__azioni { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .bento__azioni .azione { min-height: 64px; font-size: 11.5px; line-height: 1.2; text-align: center; }
+  /* i riquadri prendono l'altezza del loro contenuto */
+  .page--home .bento__alert, .page--home .bento__censite, .page--home .bento__manut, .page--home .bento__attivita { height: auto; max-height: none; }
+  .page--home .bento__alert .widget__body, .page--home .bento__attivita .widget__body, .page--home .bento__censite .widget__body, .page--home .bento__manut .widget__body { overflow: visible; margin-bottom: 0; }
+  .page--home .bento__attivita .widget__body { padding-bottom: 8px; }
+  .page--home .calg__testa { padding: 12px; }
+  .page--home .calg__giorno { padding: 12px; }
+  .page--home .calg__calendari { padding: 12px; }
+}
+/* anteprima ferma: il dito sulla mappa fa scorrere la pagina */
+.cmap--ferma { touch-action: pan-y; cursor: default; }
+/* barra in alto sul telefono: la ricerca prende tutto lo spazio libero */
+@media (max-width: 760px) { .topbar .gsearch ~ .grow { display: none; } }
+/* calendario sul telefono: l'elenco del giorno non allunga troppo la pagina */
+@media (max-width: 760px) { .calg__giorno { max-height: 380px; overflow: auto; } }

@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import { ArrowRight, CalendarDays, ClipboardList, Maximize2, Wrench } from 'lucide-react';
+import { ArrowRight, CalendarDays, ClipboardCheck, ClipboardList, MapPinPlus, Maximize2, Search, Wrench } from 'lucide-react';
 import { Calendario } from '../components/Calendario';
 import { CemeteryMap } from '../components/map/CemeteryMap';
 import { SceltaStileMappa } from '../components/Topbar';
 import { Avatar, Ciambella, Dot, StatoBadge } from '../components/ui';
-import { resetFiltri, seleziona, setFiltri, useStore } from '../data/store';
+import { apriModale, resetFiltri, seleziona, setFiltri, useStore } from '../data/store';
 import { conta, descrizioneScheda, useCimitero, useDatiCimitero, useSchedeCimitero } from '../data/selectors';
 import { COLORI_OPERAZIONE, NOMI_OPERAZIONE } from '../data/pratiche';
 import { aggiungiGiorni, dataOra, nomeCompleto, numero, oggiISO, percentuale } from '../lib/format';
+import { useTelefono } from '../lib/schermo';
 import { href, vai } from '../router';
 
 function Widget({ titolo, icona, link, linkLabel = 'Apri', children, className, colore = '#1B5A8F' }: {
@@ -30,6 +31,8 @@ export function Dashboard() {
   const config = useStore((s) => s.config);
   const db = useStore((s) => s.db);
   const stileMappa = useStore((s) => s.ui.stileMappa);
+  // sul telefono la Dashboard è la stessa del computer, in colonna: mappa piccola in alto, poi i riquadri
+  const telefono = useTelefono();
   const { quadranti, strutture, viali, aree, manutenzioni } = useDatiCimitero();
   const domani = aggiungiGiorni(oggiISO(), 1);
   const agenda = useMemo(() => db.pratiche.filter((p) => p.stato === 'programmata' && p.dataOra && p.cimiteroId === cimitero?.id && (p.dataOra.startsWith(oggiISO()) || p.dataOra.startsWith(domani))).sort((a, b) => a.dataOra!.localeCompare(b.dataOra!)), [db.pratiche, cimitero?.id, domani]);
@@ -43,6 +46,7 @@ export function Dashboard() {
   const urgenti = manutenzioni.filter((m) => m.stato !== 'risolta' && m.stato !== 'annullata' && m.priorita === 'urgente').length;
 
   if (!cimitero) return null;
+  const tutte = telefono ? '&tutte=1' : '';
   const vaiMappa = (patch: Parameters<typeof setFiltri>[0]) => {
     resetFiltri();
     setFiltri(patch);
@@ -50,7 +54,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="page page--home">
+    <div className={`page page--home ${telefono ? 'page--home-tel' : ''}`}>
       {/* senza intestazione: "Nuovo rilievo" sta nella barra in alto, come nel frame Figma */}
       <h1 className="sr-only">Dashboard · {cimitero.nome}</h1>
       <div className="bento">
@@ -63,6 +67,7 @@ export function Dashboard() {
             aree={aree}
             stile={stileMappa}
             compatta
+            ferma={telefono}
             etichetteViali={false}
             segueVolo={false}
             onSelect={(id) => {
@@ -72,7 +77,7 @@ export function Dashboard() {
           />
           <div className="bento__map-top">
             <div className="bento__map-seg"><SceltaStileMappa /></div>
-            <a className="btn btn--sm" href={href('/mappa')}><Maximize2 size={14} />Apri la mappa</a>
+            <a className="btn btn--sm" href={href('/mappa')}><Maximize2 size={14} />{telefono ? 'Schermo intero' : 'Apri la mappa'}</a>
           </div>
           <div className="bento__map-legend">
             {config.stati.filter((s) => !s.archiviato).map((s) => (
@@ -85,11 +90,20 @@ export function Dashboard() {
           </div>
         </section>
 
-        <Widget titolo="Agenda di oggi" icona={<CalendarDays size={16} />} colore="#2F6FB3" link="/operazioni?tab=agenda" linkLabel="Apri l'agenda" className="bento__alert">
+        {telefono && (
+          <div className="bento__azioni azioni-grid">
+            <button className="azione azione--verde" onClick={() => vai('/rilievo')}><MapPinPlus size={18} />Nuovo rilievo</button>
+            <button className="azione" onClick={() => vai('/ricerca')}><Search size={18} />Ricerca</button>
+            <button className="azione" onClick={() => apriModale({ tipo: 'manutenzione' })}><Wrench size={18} />Segnala</button>
+            <button className="azione" onClick={() => vai('/censimento?tab=verifiche')}><ClipboardCheck size={18} />Verifiche</button>
+          </div>
+        )}
+
+        <Widget titolo="Agenda di oggi" icona={<CalendarDays size={16} />} colore="#2F6FB3" link={telefono ? undefined : '/operazioni?tab=agenda'} linkLabel="Apri l'agenda" className="bento__alert">
           <div className="alert-list">
             {agenda.length === 0 && <p className="small muted">Nessuna operazione oggi e domani.</p>}
-            {agenda.map((p) => (
-              <a key={p.id} className="alert-item" href={href(`/operazioni?id=${p.id}`)}>
+            {(telefono ? agenda.slice(0, 5) : agenda).map((p) => (
+              <a key={p.id} className="alert-item" href={href(telefono ? `/scheda/${p.schedaId}` : `/operazioni?id=${p.id}`)}>
                 <span className="alert-dot" style={{ background: COLORI_OPERAZIONE[p.tipo] }} />
                 <span className="grow">
                   <b>{p.dataOra!.slice(11, 16)} · {NOMI_OPERAZIONE[p.tipo]} · {nomeCompleto(p.defunto)}</b>
@@ -98,13 +112,14 @@ export function Dashboard() {
                 <span className="tiny faint nowrap">{p.dataOra!.startsWith(oggi) ? 'oggi' : 'domani'}</span>
               </a>
             ))}
+            {telefono && agenda.length > 5 && <p className="small muted">E altre {agenda.length - 5}: le trovi nel calendario qui sotto.</p>}
           </div>
         </Widget>
 
         {/* il calendario grande, sotto tutta la mappa: tutto ciò che è in programma */}
         <div className="bento__cal"><Calendario /></div>
 
-        <Widget titolo="Censimento" icona={<ClipboardList size={16} />} link="/censimento" className="bento__censite">
+        <Widget titolo="Censimento" icona={<ClipboardList size={16} />} link={telefono ? '/censimento?tab=verifiche' : '/censimento'} linkLabel={telefono ? 'Verifiche' : 'Apri'} className="bento__censite">
           <div className="row gap-16">
             <Ciambella
               size={112}
@@ -123,10 +138,10 @@ export function Dashboard() {
 
         <Widget titolo="Manutenzione" icona={<Wrench size={16} />} link="/manutenzioni" colore="#E07B22" className="bento__manut">
           <div className="mini-kpis">
-            <a href={href('/manutenzioni?stato=aperta')}><b>{manutenzioni.filter((m) => m.stato === 'aperta').length}</b><span>aperte</span></a>
-            <a href={href('/manutenzioni?stato=programmata')}><b>{manutenzioni.filter((m) => m.stato === 'programmata').length}</b><span>programmate</span></a>
-            <a href={href('/manutenzioni?stato=risolta')}><b>{manutenzioni.filter((m) => m.stato === 'risolta').length}</b><span>risolte</span></a>
-            <a href={href('/manutenzioni')} className="is-danger"><b>{urgenti}</b><span>urgenti</span></a>
+            <a href={href(`/manutenzioni?stato=aperta${tutte}`)}><b>{manutenzioni.filter((m) => m.stato === 'aperta').length}</b><span>aperte</span></a>
+            <a href={href(`/manutenzioni?stato=programmata${tutte}`)}><b>{manutenzioni.filter((m) => m.stato === 'programmata').length}</b><span>programmate</span></a>
+            <a href={href(`/manutenzioni?stato=risolta${tutte}`)}><b>{manutenzioni.filter((m) => m.stato === 'risolta').length}</b><span>risolte</span></a>
+            <a href={href(telefono ? '/manutenzioni?tutte=1' : '/manutenzioni')} className="is-danger"><b>{urgenti}</b><span>urgenti</span></a>
           </div>
         </Widget>
 

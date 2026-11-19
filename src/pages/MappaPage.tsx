@@ -13,6 +13,7 @@ import type { Scheda } from '../data/types';
 import { anniFa, data, numero } from '../lib/format';
 import { googleMapsIndicazioni } from '../lib/geo';
 import { fotoUrl } from '../lib/photo';
+import { useTelefono } from '../lib/schermo';
 import { vai } from '../router';
 
 export function useConteggiStrutture(filtrate: Scheda[], attivi: boolean) {
@@ -75,6 +76,7 @@ export function MappaPage() {
   const ui = useStore((s) => s.ui);
   const schede = useStore((s) => s.db.schede);
   const { quadranti, viali, aree, strutture } = useDatiCimitero();
+  const telefono = useTelefono();
   const [pannelloFiltri, setPannelloFiltri] = useState(() => window.innerWidth > 1100);
   const [mostraQuadranti, setMostraQuadranti] = useState(false);
   const [mappa, setMappa] = useState<L.Map | null>(null);
@@ -111,7 +113,7 @@ export function MappaPage() {
           mostraPartenza
           onReady={setMappa}
         >
-          <ZoomControls onLocate={() => mappa?.fitBounds(cimitero.perimetro, { padding: [20, 20] })} />
+          <ZoomControls onLocate={() => mappa?.fitBounds(cimitero.perimetro, { padding: [20, 20] })} onRiduci={telefono ? () => vai('/') : undefined} />
           {sel && !ui.pannello && sel.cimiteroId === cimitero.id && (
             <MapAnchor lat={sel.lat} lng={sel.lng}>
               <MapCard s={sel} onChiudi={() => seleziona(null)} />

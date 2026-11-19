@@ -191,10 +191,17 @@ export function CampanellaAlert({ nelMenu }: { nelMenu?: boolean }) {
   const categorie = (Object.keys(NOMI_CATEGORIA_ALERT) as CategoriaAlert[]).filter((c) => alert.some((a) => a.categoria === c));
   const scelta = categoria && categorie.includes(categoria) ? categoria : '';
   const lista = scelta ? alert.filter((a) => a.categoria === scelta) : alert;
+  const telefono = useTelefono();
+  const pratiche = useStore((s) => s.db.pratiche);
   const apri = (a: AlertItem) => {
     segnaLetti([a.id]);
     setAperto(false);
-    if (a.link) vai(a.link);
+    if (!a.link) return;
+    // sul telefono le Operazioni cimiteriali non si aprono: l'alert porta alla scheda della postazione
+    const m = telefono ? /^\/operazioni\?id=(.+)$/.exec(a.link) : null;
+    const p = m ? pratiche.find((x) => x.id === m[1]) : undefined;
+    if (p) vai(`/scheda/${p.schedaId}`);
+    else if (!telefono || !/^\/(operazioni|concessioni|scadenze|illuminazione-votiva|amministrazione|impostazioni)/.test(a.link)) vai(a.link);
   };
   return (
     <div ref={ref} className={nelMenu ? 'campanella campanella--menu' : 'campanella'} style={{ position: 'relative' }}>
@@ -284,7 +291,7 @@ export function Topbar() {
       )}
       <div className="grow" />
       {telefono && <CampanellaAlert />}
-      {home && (
+      {home && !telefono && (
         <button className="btn btn--success topbar__new" onClick={() => vai('/rilievo')}>
           <Plus size={16} />
           <span>Nuovo rilievo</span>

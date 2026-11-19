@@ -49,7 +49,7 @@ export function ManutenzioniPage() {
   const [q, setQ] = useState('');
   const [pagina, setPagina] = useState(0);
   // sul telefono si parte dalle proprie: quelle assegnate a me o segnalate da me
-  const [soloMie, setSoloMie] = useState(true);
+  const [soloMie, setSoloMie] = useState(() => rotta.query.get('tutte') !== '1');
   const io = utente.operatoreId ?? 'ufficio';
   const oggi = oggiISO();
 

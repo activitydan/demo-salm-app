@@ -45,8 +45,8 @@ function Pagina() {
       <div className="page">
         <Empty
           titolo="Questa pagina si usa dal computer"
-          testo="Sul telefono ci sono il lavoro sul campo e la consultazione: mappa, ricerca, rilievo, manutenzioni e verifiche."
-          azione={<button className="btn btn--primary" onClick={() => vai('/mappa')}><MapIcon size={16} />Vai alla Mappa</button>}
+          testo="Sul telefono ci sono il lavoro sul campo e la consultazione: dashboard, mappa, ricerca, rilievo, manutenzioni e verifiche."
+          azione={<button className="btn btn--primary" onClick={() => vai('/')}><MapIcon size={16} />Vai alla Dashboard</button>}
         />
       </div>
     );
@@ -102,18 +102,12 @@ export function App() {
   const pronto = useStore((s) => s.pronto);
   const errore = useStore((s) => s.errore);
   const sessione = useStore((s) => s.sessione);
-  const telefono = useTelefono();
   const r = useRotta();
 
   useEffect(() => {
     setUi({ menuMobile: false, parete: null, modale: null });
     if (r.parti[0] !== 'mappa' && r.parti[0] !== undefined) setUi({ pannello: false });
   }, [r.path]);
-
-  // sul telefono la pagina iniziale è la Mappa: la Dashboard ha le statistiche, che restano sul computer
-  useEffect(() => {
-    if (sessione && sessione.ruolo !== 'agenzia' && telefono && r.path === '/') vai('/mappa');
-  }, [sessione, telefono, r.path]);
 
   if (!pronto || errore) return <Caricamento errore={errore} />;
 

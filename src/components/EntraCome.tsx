@@ -2,21 +2,19 @@ import { useState } from 'react';
 import { ArrowLeft, Building2, ChevronRight, ClipboardList, Search, ShieldCheck } from 'lucide-react';
 import { UFFICIO } from '../config/defaults';
 import { entra, useStore } from '../data/store';
-import { useTelefono } from '../lib/schermo';
 import { vai } from '../router';
 import { FIRMA, Mark, Wordmark } from './Logo';
 
 /** Ingresso della demo: si sceglie il ruolo, senza password. Gli accessi veri arriveranno con il backend. */
 export function EntraCome() {
   const operatori = useStore((s) => s.db.operatori);
-  const telefono = useTelefono();
   const agenzie = useStore((s) => s.db.agenzie).filter((a) => a.attiva && a.accesso);
   // null = scelta del ruolo; poi si sceglie chi si è
   const [scegli, setScegli] = useState<'operatore' | 'agenzia' | null>(null);
   const scegliOperatore = scegli === 'operatore';
   const setScegliOperatore = (v: boolean) => setScegli(v ? 'operatore' : null);
   const attivi = operatori.filter((o) => o.attivo);
-  const dopo = () => vai(telefono ? '/mappa' : '/');
+  const dopo = () => vai('/');
 
   return (
     <div className="entra">

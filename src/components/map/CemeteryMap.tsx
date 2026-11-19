@@ -42,6 +42,8 @@ export interface CemeteryMapProps {
   onMapClick?: (ll: LatLng) => void;
   disegno?: LatLng[] | null;
   compatta?: boolean;
+  /** anteprima ferma: niente trascinamento né zoom, così sul telefono il dito fa scorrere la pagina */
+  ferma?: boolean;
   mostraPartenza?: boolean;
   etichetteViali?: boolean;
   className?: string;
@@ -54,7 +56,7 @@ export function CemeteryMap(props: CemeteryMapProps) {
   const {
     cimitero, schede, strutture, conteggiStrutture = null, quadranti = [], mostraQuadranti = false, evidenziaQuadrante = null,
     viali = [], aree = [], stile: stileScelto, coloraPer = 'stato', selezionata = null, onSelect, onMapClick, disegno = null,
-    compatta = false, mostraPartenza = false, etichetteViali = true, className, children, onReady, segueVolo = true,
+    compatta = false, ferma = false, mostraPartenza = false, etichetteViali = true, className, children, onReady, segueVolo = true,
   } = props;
   // senza rete le immagini satellitari non arrivano: la mappa passa da sola a Planimetria
   const senzaRete = useSenzaRete();
@@ -70,6 +72,14 @@ export function CemeteryMap(props: CemeteryMapProps) {
   cbClick.current = onMapClick;
   const perimetro = useRef(cimitero.perimetro);
   perimetro.current = cimitero.perimetro;
+
+  // anteprima ferma: si spengono trascinamento e zoom (e si riaccendono se la finestra torna larga)
+  useEffect(() => {
+    if (!mappa) return;
+    const come = ferma ? 'disable' : 'enable';
+    for (const h of [mappa.dragging, mappa.touchZoom, mappa.doubleClickZoom, mappa.scrollWheelZoom, mappa.boxZoom, mappa.keyboard]) h?.[come]();
+    mappa.getContainer().classList.toggle('cmap--ferma', ferma);
+  }, [mappa, ferma]);
 
   // creazione mappa
   useLayoutEffect(() => {
@@ -381,10 +391,15 @@ export function MapAnchor({ lat, lng, children, offsetY = 14 }: { lat: number; l
   );
 }
 
-export function ZoomControls({ onLocate }: { onLocate?: () => void }) {
+export function ZoomControls({ onLocate, onRiduci }: { onLocate?: () => void; onRiduci?: () => void }) {
   const m = useMappa();
   return (
     <div className="map-ctrl">
+      {onRiduci && (
+        <button className="map-ctrl__btn" onClick={onRiduci} aria-label="Torna alla Dashboard" title="Torna alla Dashboard">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" /></svg>
+        </button>
+      )}
       <button className="map-ctrl__btn" onClick={() => m?.zoomIn(0.75)} aria-label="Ingrandisci">+</button>
       <button className="map-ctrl__btn" onClick={() => m?.zoomOut(0.75)} aria-label="Riduci">−</button>
       {onLocate && (

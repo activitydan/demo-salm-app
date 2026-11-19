@@ -6,6 +6,7 @@ import { labelLista, NOMI_CATEGORIA_ALERT, useCimitero, useUtente } from '../dat
 import { useStore } from '../data/store';
 import type { ConfigScheda, Database, TipoOperazione } from '../data/types';
 import { GIORNI_BREVI, meseAnno, nomeCompleto, oggiISO } from '../lib/format';
+import { useTelefono } from '../lib/schermo';
 import { vai } from '../router';
 
 // Calendario unico: tutto ciò che è in programma, diviso in "calendari" che si accendono e si spengono
@@ -31,6 +32,8 @@ export interface EventoCalendario {
   titolo: string;
   sotto: string;
   link?: string;
+  /** sul telefono Operazioni cimiteriali e Concessioni non si aprono: si va alla scheda della postazione */
+  linkTelefono?: string;
   /** già fatto: resta nel calendario, più chiaro */
   fatto?: boolean;
   /** richiesta di un'agenzia non ancora accolta dall'ufficio */
@@ -49,14 +52,14 @@ export function eventiCalendario(db: Database, config: ConfigScheda, cimiteroId:
     if (p.cimiteroId !== cimiteroId || !p.dataOra || (p.stato !== 'programmata' && p.stato !== 'eseguita')) continue;
     out.push({
       id: `pr-${p.id}`, giorno: p.dataOra.slice(0, 10), ora: p.dataOra.slice(11, 16), calendario: p.tipo, titolo: `${NOMI_OPERAZIONE[p.tipo]} · ${nomeCompleto(p.defunto)}`,
-      sotto: `${p.schedaId}${p.provvisoria ? ' · provvisoria' : ''}`, link: `/operazioni?id=${p.id}`, fatto: p.stato === 'eseguita', persone: p.operatoriIds ?? [], agenziaId: p.agenziaId, praticaId: p.id,
+      sotto: `${p.schedaId}${p.provvisoria ? ' · provvisoria' : ''}`, link: `/operazioni?id=${p.id}`, linkTelefono: `/scheda/${p.schedaId}`, fatto: p.stato === 'eseguita', persone: p.operatoriIds ?? [], agenziaId: p.agenziaId, praticaId: p.id,
     });
   }
   for (const r of db.richieste) {
     if (r.cimiteroId !== cimiteroId || r.stato !== 'in_attesa') continue;
     out.push({
       id: `ra-${r.id}`, giorno: r.dataOra.slice(0, 10), ora: r.dataOra.slice(11, 16), calendario: r.tipo, titolo: `${NOMI_OPERAZIONE[r.tipo]} · ${nomeCompleto(r.defunto)}`,
-      sotto: `Richiesta ${r.numero} in attesa`, link: '/operazioni', attesa: true, persone: [], agenziaId: r.agenziaId, richiestaId: r.id,
+      sotto: `Richiesta ${r.numero} in attesa`, link: '/operazioni', linkTelefono: '', attesa: true, persone: [], agenziaId: r.agenziaId, richiestaId: r.id,
     });
   }
   for (const m of db.manutenzioni) {
@@ -73,7 +76,7 @@ export function eventiCalendario(db: Database, config: ConfigScheda, cimiteroId:
   }
   for (const c of db.concessioni) {
     if (c.cimiteroId !== cimiteroId || c.stato === 'chiusa' || c.perpetua) continue;
-    out.push({ id: `conc-${c.id}`, giorno: c.scadenza, calendario: 'scadenza', titolo: `Scade la concessione ${c.numero}`, sotto: nomiConcessionari(c), link: `/concessioni?id=${c.id}`, persone: [] });
+    out.push({ id: `conc-${c.id}`, giorno: c.scadenza, calendario: 'scadenza', titolo: `Scade la concessione ${c.numero}`, sotto: nomiConcessionari(c), link: `/concessioni?id=${c.id}`, linkTelefono: `/scheda/${c.schedeIds[0]}`, persone: [] });
   }
   for (const s of db.schede) {
     if (s.cimiteroId !== cimiteroId || !s.defunti.length) continue;
@@ -150,7 +153,12 @@ export function Calendario({ agenziaId, onEvento, azione }: { agenziaId?: string
     setSpenti(nuovi);
     try { window.localStorage.setItem(CHIAVE, JSON.stringify(nuovi)); } catch { /* resta per questa volta */ }
   };
-  const apri = (e: EventoCalendario) => (onEvento ? onEvento(e) : e.link && vai(e.link));
+  const telefono = useTelefono();
+  const apri = (e: EventoCalendario) => {
+    if (onEvento) return onEvento(e);
+    const dove = telefono && e.linkTelefono !== undefined ? e.linkTelefono : e.link;
+    if (dove) vai(dove);
+  };
   const delGiorno = perGiorno.get(giorno) ?? [];
   const operatori = db.operatori.filter((o) => o.attivo);
   const agenzie = db.agenzie.filter((a) => a.attiva);

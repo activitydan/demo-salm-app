@@ -38,8 +38,9 @@ export const VOCI_COMPUTER: VoceMenu[] = [
   { path: '/impostazioni', label: 'Impostazioni', icon: Settings, ruoli: ['amministratore'], gruppo: 'Configurazione', soloComputer: true },
 ];
 
-// Sul telefono solo campo e consultazione, uguale per Operatore e Amministratore.
+// Sul telefono solo campo e consultazione, uguale per Operatore e Amministratore. La Dashboard è quella del computer, in colonna.
 export const VOCI_TELEFONO: VoceMenu[] = [
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/mappa', label: 'Mappa', icon: MapIcon },
   { path: '/ricerca', label: 'Ricerca', icon: Search },
   { path: '/rilievo', label: 'Nuovo rilievo', icon: MapPinPlus },
@@ -134,7 +135,7 @@ export function Sidebar() {
     <>
       <div className={`sidebar-backdrop ${aperta ? 'is-open' : ''}`} onClick={chiudi} />
       <aside className={`sidebar ${aperta ? 'is-open' : ''}`} aria-label="Menu principale">
-        <a className="sidebar__brand" href={href(telefono && !agenzia ? '/mappa' : '/')} onClick={chiudi}>
+        <a className="sidebar__brand" href={href('/')} onClick={chiudi}>
           <Logo dark size={36} />
         </a>
         <nav className="sidebar__nav">
